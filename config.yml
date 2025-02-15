@@ -1,0 +1,47 @@
+---
+- name: Configre users
+  hosts: otus-users
+  become: true
+
+  tasks:
+  - name: Update cachce
+    ansible.builtin.apt:
+      update_cache: true
+      cache_valid_time: 3600
+
+  - name: Create admin group
+    ansible.builtin.group:
+      name: admin
+      state: present
+      force: true
+
+  - name: User add otusadm
+    ansible.builtin.user:
+      name: otusadm
+      shell: /bin/bash
+      home: /home/otusadm
+      password: '$1$K/SHbApt$AgZOjI1ww8Uc623MUWd7d.'
+      groups: admin
+
+  - name: User add otus
+    ansible.builtin.user:
+      name: otus
+      shell: /bin/bash
+      home: /home/otus
+      password: '$1$K/SHbApt$AgZOjI1ww8Uc623MUWd7d.'
+      groups: admin
+
+  - name: Copy login script
+    ansible.builtin.copy:
+      src: ~/ansible/outs-users/login.sh
+      dest: /usr/local/bin/login.sh
+      mode: '0777'
+
+  - name: Copy PAM config
+    ansible.builtin.copy:
+      src: ~/ansible/outs-users/sshd
+      dest: /etc/pam.d/sshd
+      owner: root
+      group: root
+      mode: '0644'
+      remote_src: no
